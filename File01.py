@@ -19,7 +19,6 @@ import plotly.figure_factory as ff
 
 import itertools
 from datetime import datetime
-from PIL import Image
     
 def load_csv():  
     df_input = pd.DataFrame()    
@@ -39,10 +38,11 @@ def prep_data(df, date_col, metric_col):
 st.title('Time-Series Forecasting with Prophet')
 st.write('This app enables you to generate time series forecast.')
 
-# with st.sidebar:
-#     st.image(Image.open("Streamlit_image.png"), use_column_width=True)
-#     st.header('_**Streamlit Prophet**_')
-#     st.subheader('A web-app to train, evaluate and optimise forecasting model in a visual way using **[Prophet](https://facebook.github.io/prophet/)**.')
+with st.sidebar:
+    image_url = "https://github.com/MuskaanMehra/Time-Series-Forecast-Application/blob/main/Assets/Streamlit_image.png"
+    st.image(image_url, use_column_width=True)
+    st.header('_**Streamlit Prophet**_')
+    st.subheader('A web-app to train, evaluate and optimise forecasting model in a visual way using **[Prophet](https://facebook.github.io/prophet/)**.')
 
 df =  pd.DataFrame()   
 
