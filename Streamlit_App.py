@@ -41,8 +41,8 @@ st.title('Time-Series Forecasting with Prophet')
 st.write('This app enables you to generate time series forecast.')
 
 with st.sidebar:
-    #image_url = "https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/blob/main/Streamlit_image.png"
-    #st.image(image_url, use_column_width=True)
+    image_url = "https://github.com/MuskaanMehra/Time-Series-Forecast-Application/blob/main/Assets/Streamlit_Image.png"
+    st.image(image_url, use_column_width=True)
     #st.image(Image.open('Streamlit_image.png'), use_column_width=True)
     st.header('_**Streamlit Prophet**_')
     st.subheader('A web-app to train, evaluate and optimise forecasting model in a visual way using **[Prophet](https://facebook.github.io/prophet/)**.')
