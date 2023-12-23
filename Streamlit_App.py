@@ -53,11 +53,29 @@ df =  pd.DataFrame()
 st.subheader('Data loading')
 
 #UPLOADING DATASET
-input = st.file_uploader('Upload a Dataset')
 
-if input is not None:
-    with st.spinner('Loading data..'):
-        df = load_csv()
+Data = st.radio('Data', ['Upload Dataset', 'Select sample dataset'],index=0, horizontal=True, label_visibility='collapsed', key = 'Data')
+if Data == 'Upload Dataset':
+    input = st.file_uploader('Upload a Dataset')
+    if input is not None:
+        with st.spinner('Loading data..'):
+            df = load_csv()
+if Data == 'Select sample dataset':
+    File = st.selectbox('Label', ['Choose a Dataset','Netflix Stock Price', 'Sample Dataset'], index=0, label_visibility='collapsed', key='file')
+    if File == 'Netflix Stock Price':
+        df = pd.read_csv('https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/main/Datasets/Netflix%20Stock%20Price.csv', #https://github.com/MuskaanMehra/Time-Series-Forecast-Application/blob/main/Datasets/Netflix%20Stock%20Price.csv', 
+                            sep=None,
+                            encoding='utf-8',
+                            parse_dates=True,
+                            infer_datetime_format=True,
+                            )
+    if File == 'Sample Dataset':
+        df = pd.read_csv('https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/main/Datasets/Sample%20Forecast.csv', #'https://github.com/MuskaanMehra/Time-Series-Forecast-Application/blob/main/Datasets/Sample%20Forecast.csv',
+                            sep=None,
+                            encoding='utf-8',
+                            parse_dates=True,
+                            infer_datetime_format=True,
+                            )
 
 if not df.empty:
         columns = list(df.columns)
