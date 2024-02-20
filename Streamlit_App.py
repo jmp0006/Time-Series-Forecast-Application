@@ -195,8 +195,8 @@ with st.container():
     with st.expander('**Hyperparameters**'):
         st.write('In this section it is possible to tune the scaling coefficients.')
             
-        seasonality_scale_values= [0.1, 1.0,5.0,10.0]    
-        changepoint_scale_values= [0.01, 0.1, 0.5,1.0]
+        seasonality_scale_values= [0.01, 0.1, 1.0, 10.0]    
+        changepoint_scale_values= [0.001, 0.01, 0.1, 0.5]
 
         st.write("The changepoint prior scale determines the flexibility of the trend, and in particular how much the trend changes at the trend changepoints.")
         changepoint_scale= st.select_slider(label= 'Changepoint prior scale',options=changepoint_scale_values)
@@ -216,9 +216,9 @@ with st.container():
                             daily_seasonality=daily,
                             weekly_seasonality=weekly,
                             yearly_seasonality=yearly,
-                            growth=growth,
-                            changepoint_prior_scale=changepoint_scale,
-                            seasonality_prior_scale= seasonality_scale)
+                            growth=growth)
+                            #changepoint_prior_scale=changepoint_scale,
+                            #seasonality_prior_scale= seasonality_scale)
                 if holidays:
                     m.add_country_holidays(country_name=selected_country)
                         
@@ -268,17 +268,19 @@ with st.container():
     st.subheader('Model validation')
     st.write("In this section it is possible to do cross-validation of the model.")
     with st.expander("**Explanation**"):
-        st.markdown("""The Prophet library makes it possible to divide our historical data into training data and testing data for cross validation. The main concepts for cross validation with Prophet are:""")
-        st.write("Training data (initial): The amount of data set aside for training.")
+        st.markdown("""The Prophet library makes it possible to divide our historical data into training data and testing data for cross validation.""")
+        #st.write("Training data (initial): The amount of data set aside for training.")
         st.write("Horizon: The data set aside for validation.")
-        st.write("Period: a forecast is made for every observed point between cutoff and cutoff + horizon.""")
+        #st.write("Period: a forecast is made for every observed point between cutoff and cutoff + horizon.""")
+    
+    with st.expander("**Cross-validation**"):
+        horizon = st.number_input(value= 30, label="Horizon",min_value=30,max_value=365)
+        
+    #     initial = st.number_input(value= 180,label="initial",min_value=30)
 
-    with st.expander("**Cross-validation**"):    
-        initial = st.number_input(value= 180,label="initial",min_value=30)
+    #     period = st.number_input(value= 30,label="period",min_value=30,max_value=365)
 
-        period = st.number_input(value= 30,label="period",min_value=30,max_value=365)
-
-        horizon = st.number_input(value= 30, label="horizon",min_value=30,max_value=365)
+    #     horizon = st.number_input(value= 30, label="horizon",min_value=30,max_value=365)
 
     with st.expander("**Metrics**"):            
         if input:
@@ -287,8 +289,7 @@ with st.container():
             if st.checkbox('Calculate metrics'):
                  with st.spinner("Cross validating.."):
                     try:
-                        df_cv = cross_validation(m, initial=int(initial),
-                                                period=int(period), 
+                        df_cv = cross_validation(m, 
                                                 horizon = int(horizon),
                                                 parallel="processes")                                                                  
                             
@@ -302,7 +303,7 @@ with st.container():
                         metrics=0
 
                     if metrics == 1:
-                        metrics = ['mse','rmse','mae','mape','mdape','coverage']
+                        metrics = ['mse','rmse','mae','mape']
                         selected_metric = st.selectbox("Select metric to plot",options=metrics)
                         if selected_metric:
                             fig4 = plot_cross_validation_metric(df_cv, metric=selected_metric)
@@ -315,12 +316,12 @@ with st.container():
     st.subheader('Hyperparameter Tuning')
     st.write("In this section it is possible to find the best combination of hyperparamenters.")
 
-    param_grid = {'changepoint_prior_scale': [0.01, 0.1, 0.5, 1.0],
-                  'seasonality_prior_scale': [0.1, 1.0, 5.0, 10.0],}
+    param_grid = {'changepoint_prior_scale': [0.001, 0.01, 0.1, 0.5],
+                  'seasonality_prior_scale': [0.01, 0.1, 1.0, 10.0],}
 
     # Generate all combinations of parameters
     all_params = [dict(zip(param_grid.keys(), v)) for v in itertools.product(*param_grid.values())]
-    rmses = []  # Store the RMSEs for each params here
+    mapes = []  # Store the MAPE for each params here
 
     if input:
         if output == 1:
@@ -331,22 +332,19 @@ with st.container():
                     # Use cross validation to evaluate all parameters
                         for params in all_params:
                             m = Prophet(**params).fit(df)  # Fit model with given params
-                            df_cv = cross_validation(m, initial=initial,
-                                                            period=period,
-                                                            horizon=horizon,
-                                                            parallel="processes")
+                            df_cv = cross_validation(m, horizon=horizon, parallel="processes")
                             df_p = performance_metrics(df_cv, rolling_window=1)
-                            rmses.append(df_p['rmse'].values[0])
+                            mapes.append(df_p['mape'].values[0])
                     except Exception as e:
                         st.error(f"Error during Hyperparameter optimization: {e}")
                         
 
                 # Find the best parameters
                 tuning_results = pd.DataFrame(all_params)
-                tuning_results['rmse'] = rmses
+                tuning_results['mape'] = mapes
                 st.dataframe(tuning_results)
                             
-                best_params = all_params[np.argmin(rmses)]
+                best_params = all_params[np.argmin(mapes)]
                     
                 st.write('The best parameter combination is:')
                 st.write(best_params)
