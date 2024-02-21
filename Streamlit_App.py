@@ -7,8 +7,9 @@ from prophet.plot import add_changepoints_to_plot
 from prophet.diagnostics import cross_validation
 from prophet.diagnostics import performance_metrics
 from prophet.plot import plot_cross_validation_metric
-from prophet.serialize import model_to_json, model_from_json
 import holidays
+
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 import altair as alt
 import plotly as plt
@@ -138,7 +139,7 @@ with st.container():
                             'floor':0
                         }
             cap=1
-            floor=1
+            floor=0
             df['cap']=1
             df['floor']=0
 
@@ -164,28 +165,34 @@ with st.container():
     with st.expander('**Holidays**'):    
         countries = ['Country name','United States','India', 'United Kingdom', 'France','Germany']
         with st.container():
-            years=[2023]
+            years=datetime.now().year
             selected_country = st.selectbox(label="Select country",options=countries)
+            #holidays = st.checkbox('Add country holidays to the model')
 
             if selected_country == 'India':
                 for date, name in sorted(holidays.IN(years=years).items()):
-                    st.write(date,name) 
+                    st.write(date,name)
+                    country_code = 'IN' 
                             
             if selected_country == 'United Kingdom':
                 for date, name in sorted(holidays.GB(years=years).items()):
-                    st.write(date,name)                      
+                    st.write(date,name)
+                    country_code = 'GB'                      
 
             if selected_country == 'United States':                   
                 for date, name in sorted(holidays.US(years=years).items()):
                     st.write(date,name)
+                    country_code = 'US'
 
             if selected_country == 'France':                    
                 for date, name in sorted(holidays.FR(years=years).items()):
                     st.write(date,name)
+                    country_code = 'FR'
                             
             if selected_country == 'Germany':                    
                 for date, name in sorted(holidays.DE(years=years).items()):
                     st.write(date,name)
+                    country_code = 'DE'
 
             else:
                 holidays = False
@@ -217,10 +224,9 @@ with st.container():
                             weekly_seasonality=weekly,
                             yearly_seasonality=yearly,
                             growth=growth)
-                            #changepoint_prior_scale=changepoint_scale,
-                            #seasonality_prior_scale= seasonality_scale)
+                            
                 if holidays:
-                    m.add_country_holidays(country_name=selected_country)
+                    m.add_country_holidays(country_name=country_code)
                         
                 if monthly:
                     m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
@@ -245,7 +251,6 @@ with st.container():
                     fig1 = m.plot(forecast)
                     st.write('Forecast plot')
                     st.write(fig1)                   
-                    #st.pyplot(fig1, use_container_width=True)
                     output = 1
 
                 if growth == 'linear':
@@ -269,18 +274,10 @@ with st.container():
     st.write("In this section it is possible to do cross-validation of the model.")
     with st.expander("**Explanation**"):
         st.markdown("""The Prophet library makes it possible to divide our historical data into training data and testing data for cross validation.""")
-        #st.write("Training data (initial): The amount of data set aside for training.")
         st.write("Horizon: The data set aside for validation.")
-        #st.write("Period: a forecast is made for every observed point between cutoff and cutoff + horizon.""")
     
     with st.expander("**Cross-validation**"):
-        horizon = st.number_input(value= 30, label="Horizon",min_value=30,max_value=365)
-        
-    #     initial = st.number_input(value= 180,label="initial",min_value=30)
-
-    #     period = st.number_input(value= 30,label="period",min_value=30,max_value=365)
-
-    #     horizon = st.number_input(value= 30, label="horizon",min_value=30,max_value=365)
+        horizon = st.number_input(value= 90, label="Horizon",min_value=30,max_value=365)
 
     with st.expander("**Metrics**"):            
         if input:
@@ -290,12 +287,12 @@ with st.container():
                  with st.spinner("Cross validating.."):
                     try:
                         df_cv = cross_validation(m, 
-                                                horizon = int(horizon),
+                                                horizon = f"{horizon} days",
                                                 parallel="processes")                                                                  
                             
                         df_p= performance_metrics(df_cv)
                         # PERFORMANCE METRICS TABLE
-                        st.dataframe(df_p)
+                        st.dataframe(df_p, use_container_width=True)
                         metrics = 1
 
                     except Exception as e:
@@ -303,7 +300,7 @@ with st.container():
                         metrics=0
 
                     if metrics == 1:
-                        metrics = ['mse','rmse','mae','mape']
+                        metrics = ['mae','mape', 'mse', 'rmse']
                         selected_metric = st.selectbox("Select metric to plot",options=metrics)
                         if selected_metric:
                             fig4 = plot_cross_validation_metric(df_cv, metric=selected_metric)
@@ -332,7 +329,7 @@ with st.container():
                     # Use cross validation to evaluate all parameters
                         for params in all_params:
                             m = Prophet(**params).fit(df)  # Fit model with given params
-                            df_cv = cross_validation(m, horizon=horizon, parallel="processes")
+                            df_cv = cross_validation(m, horizon=f"{horizon} days", parallel="processes")
                             df_p = performance_metrics(df_cv, rolling_window=1)
                             mapes.append(df_p['mape'].values[0])
                     except Exception as e:
@@ -342,7 +339,7 @@ with st.container():
                 # Find the best parameters
                 tuning_results = pd.DataFrame(all_params)
                 tuning_results['mape'] = mapes
-                st.dataframe(tuning_results)
+                st.dataframe(tuning_results, use_container_width=True)
                             
                 best_params = all_params[np.argmin(mapes)]
                     
