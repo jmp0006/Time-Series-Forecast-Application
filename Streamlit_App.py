@@ -9,8 +9,6 @@ from prophet.diagnostics import performance_metrics
 from prophet.plot import plot_cross_validation_metric
 import holidays
 
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-
 import altair as alt
 import plotly as plt
 import plotly.offline as pyoff
