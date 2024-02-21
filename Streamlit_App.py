@@ -23,9 +23,7 @@ from PIL import Image
     
 def load_csv():  
     df_input = pd.DataFrame()    
-    df_input=pd.read_csv(input,sep=None, engine='python', encoding='utf-8',
-                            parse_dates=True,
-                            infer_datetime_format=True)
+    df_input=pd.read_csv(input,sep=None, engine='python', encoding='utf-8',parse_dates=True,infer_datetime_format=True)
     return df_input
 
 def prep_data(df, date_col, metric_col):
@@ -314,20 +312,25 @@ with st.container():
                                                 parallel="processes")                                                                  
                             
                         df_p= performance_metrics(df_cv)
-                        # PERFORMANCE METRICS TABLE
-                        st.dataframe(df_p, use_container_width=True)
-                        metrics = 1
-
-                    except Exception as e:
-                        st.error(f"Error during Cross-validation: {e}")
-                        metrics=0
-
-                    if metrics == 1:
                         metrics = ['mae','mape', 'mse', 'rmse']
                         selected_metric = st.selectbox("Select metric to plot",options=metrics)
                         if selected_metric:
                             fig4 = plot_cross_validation_metric(df_cv, metric=selected_metric)
                             st.write(fig4)
+                        # # PERFORMANCE METRICS TABLE
+                        # st.dataframe(df_p, use_container_width=True)
+                        # metrics = 1
+
+                    except Exception as e:
+                        st.error(f"Error during Cross-validation: {e}")
+                        metrics=0
+
+                    # if metrics == 1:
+                    #     metrics = ['mae','mape', 'mse', 'rmse']
+                    #     selected_metric = st.selectbox("Select metric to plot",options=metrics)
+                    #     if selected_metric:
+                    #         fig4 = plot_cross_validation_metric(df_cv, metric=selected_metric)
+                    #         st.write(fig4)
 
         else:
             st.write("Create a forecast to see metrics")
