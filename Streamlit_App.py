@@ -62,7 +62,32 @@ if Data == 'Upload Dataset':
         with st.spinner('Loading data..'):
             df = load_csv()
 if Data == 'Select sample dataset':
-    File = st.selectbox('Label', ['Choose a Dataset','Netflix Stock Price', 'Sample Dataset'], index=0, label_visibility='collapsed', key='file')
+    File = st.selectbox('Label', ['Choose a Dataset','Air Passengers','Peyton Manning','Retail Sales', 'Netflix Stock Price', 'Sample Dataset'], index=0, label_visibility='collapsed', key='file')
+    
+    if File == 'Air Passengers':
+        df = pd.read_csv('https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/main/Datasets/Air_Passengers.csv',
+                            sep=None,
+                            encoding='utf-8',
+                            parse_dates=True,
+                            infer_datetime_format=True,
+                            )
+        
+    if File == 'Peyton Manning':
+        df = pd.read_csv('https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/main/Datasets/Peyton_Manning.csv',
+                            sep=None,
+                            encoding='utf-8',
+                            parse_dates=True,
+                            infer_datetime_format=True,
+                            )
+        
+    if File == 'Retail Sales':
+        df = pd.read_csv('https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/main/Datasets/Retail_Sales.csv',
+                            sep=None,
+                            encoding='utf-8',
+                            parse_dates=True,
+                            infer_datetime_format=True,
+                            )
+        
     if File == 'Netflix Stock Price':
         df = pd.read_csv('https://raw.githubusercontent.com/MuskaanMehra/Time-Series-Forecast-Application/main/Datasets/Netflix%20Stock%20Price.csv', #https://github.com/MuskaanMehra/Time-Series-Forecast-Application/blob/main/Datasets/Netflix%20Stock%20Price.csv', 
                             sep=None,
